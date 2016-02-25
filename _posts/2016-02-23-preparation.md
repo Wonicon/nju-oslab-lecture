@@ -112,10 +112,10 @@ objcopy --strip-all --only-section=.text --output-target=binary mbr mbr
 ```
 
 这个命令的具体解释如下：<br />
-｀--strip-all` 去掉符号表等信息
-`--only-section=.text` 只拷贝代码段的内容
-｀--output-target=binary` 生成纯二进制
-｀mbr mbr`　前者为输入，后者为输出
+`--strip-all` 去掉符号表等信息<br />
+`--only-section=.text` 只拷贝代码段的内容<br />
+`--output-target=binary` 生成纯二进制<br />
+`mbr mbr` 前者为输入，后者为输出
 
 然后我们用特殊的反汇编姿势查看我们的引导扇区：
 
