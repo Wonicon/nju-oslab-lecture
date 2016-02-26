@@ -64,6 +64,7 @@ qemu-system-i386 [options] disk_image
 
 .globl start          # 将符号 start 暴露给链接器
 start:                # start 表示代码的起始地址
+  cli                 # 关中断
   mov $0x13, %ah      # 设置模式：显式字符串
   mov $0x01, %al      # 设置显式模式：(1) 使用 BL 指定的样式 (2) 更新光标
   mov $0x00, %bh      # 设置代码页，与字体相关； QEMU 下仅第一个代码页可用
@@ -74,7 +75,8 @@ start:                # start 表示代码的起始地址
   mov $0x00, %dh      # 首字符输出在第 1 行
   mov $0x00, %dl      # 首字符输出在第 1 列
   int $0x10           # BIOS 中断，VGA 相关服务
-  hlt                 # 暂停执行
+loop:                 # loop 表示下面这条指令的首地址
+  jmp loop            # 无限循环，防止继续执行超出内存
 
 str:                  # str 表示字符串首地址
   .ascii "Hello, World!"
@@ -85,7 +87,7 @@ end:                  # end 表示字符串之后的地址，用于计算长度
 
 ```
 gcc -m32 -c mbr.S
-ld -m elf_i386 -e start -T text=0x7C00 -o mbr mbr.o
+ld -m elf_i386 -e start -Ttext=0x7C00 -o mbr mbr.o
 ```
 
 编译链接选项的具体解释如下：<br />
@@ -93,7 +95,7 @@ ld -m elf_i386 -e start -T text=0x7C00 -o mbr mbr.o
 `-c` 表示只编译不链接，因为我们需要特殊的链接姿势；<br />
 `-m elf_i386` 表示生成 32 位的 ELF 格式可执行文件；<br />
 `-e start` 表示 start 作为程序入口地址， start 必须外部可见，即是非 static 修饰的 C 符号或 .globl 修饰的 AT&T 格式的汇编代码符号；<br />
-`-T text=0x7C00` 表示链接脚本，这里只是简单地让代码段从 0x7C00 开始，因为这里是实际刚开始执行这 512 个字节执行时 CS:IP 指向的地址，而代码中 `mov $(end-str), %cx` 使用了绝对寻址，所以需要设定好起始地址；<br />
+`-Ttext=0x7C00` 表示链接脚本，这里只是简单地让代码段从 0x7C00 开始，因为这里是实际刚开始执行这 512 个字节执行时 CS:IP 指向的地址，而代码中 `mov $(end-str), %cx` 使用了绝对寻址，所以需要设定好起始地址；<br />
 `-o mbr` 生成文件为 mbr
 
 生成了具有实际意义的机器执行序列后，下面就该制作 512B 大小的引导扇区了，不过别急，我们先看看这个生成的可执行文件有多大：
