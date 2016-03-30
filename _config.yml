@@ -17,5 +17,5 @@ url: "http://www.wonicon.com" # the base hostname & protocol for your site
 # to support fency code block
 markdown: redcarpet
 redcarpet:
-    extensions: ["no_intra_emphasis", "tables", "autolink", "strikethrough", "with_toc_data"]
+    extensions: ["no_intra_emphasis", "tables", "autolink", "strikethrough"]
 permalink: /:title.html
